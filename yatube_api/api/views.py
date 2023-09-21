@@ -1,4 +1,5 @@
 from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, viewsets
 from rest_framework.permissions import (
     IsAuthenticated, IsAuthenticatedOrReadOnly
@@ -21,13 +22,14 @@ class PostViewSet(viewsets.ModelViewSet):
     """Представление для объектов модели Post."""
     queryset = Post.objects.all()
     serializer_class = PostSerializer
-    permission_classes = (IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly)
+    filter_backends = (DjangoFilterBackend,)
+    filterset_fields = ('author', 'group')
 
     def get_permissions(self):
         """Изменение разрешений, если получен GET запрос."""
         if self.action == 'retrieve':
             return (ReadOnly(),)
-        return super().get_permissions()
+        return (IsAuthenticatedOrReadOnly(), IsOwnerOrReadOnly())
 
     def perform_create(self, serializer):
         """Сохранение автора при создинии публикации."""
@@ -37,13 +39,12 @@ class PostViewSet(viewsets.ModelViewSet):
 class CommentViewSet(viewsets.ModelViewSet):
     """Представление для объектов модели Comment."""
     serializer_class = CommentSerializer
-    permission_classes = (IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly)
 
     def get_permissions(self):
         """Изменение разрешений, если получен GET запрос."""
         if self.action == 'retrieve':
             return (ReadOnly(),)
-        return super().get_permissions()
+        return (IsAuthenticatedOrReadOnly(), IsOwnerOrReadOnly())
 
     def get_queryset(self):
         """Получение набора комментариев для запрашиваемой публикации."""

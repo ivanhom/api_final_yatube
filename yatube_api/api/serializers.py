@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
+from api import messages
 from posts.models import Comment, Follow, Group, Post, User
 
 
@@ -53,18 +54,18 @@ class FollowSerializer(serializers.ModelSerializer):
         model = Follow
         fields = ('user', 'following')
 
-        validators = [
+        validators = (
             UniqueTogetherValidator(
                 queryset=Follow.objects.all(),
                 fields=('user', 'following'),
-                message='Вы уже подписаны на данного автора'
-            )
-        ]
+                message=messages.UNIQUE_FOLLOWING_VALIDATION_ERROR
+            ),
+        )
 
-    def validate_following(self, following):
+    def validate(self, value):
         """Проверка при попытке пользователя подписаться на самого себя."""
-        if self.context.get('request').user == following:
+        if self.context.get('request').user == value.get('following'):
             raise serializers.ValidationError(
-                'Нельзя подписаться на самого себя!'
+                messages.SELF_FOLLOWING_VALIDATION_ERROR
             )
-        return following
+        return value
