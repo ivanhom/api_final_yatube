@@ -11,7 +11,7 @@ git clone git@github.com:ivanhom/api_final_yatube.git
 ```
 
 ```shell
-cd kapi_final_yatube
+cd api_final_yatube
 ```
 <br>
 
